@@ -8,7 +8,7 @@ st.set_page_config(page_title="AI 天氣問答機器人", page_icon="🤖", layo
 # --- 【核心開發者：賴以航 原生穩定版區塊】 ---
 with st.container(border=True):
     st.subheader("👨‍💻 核心開發者：賴以航 (Yi-Hang Lai)")
-    st.caption("🤖 雲端全端自動化專案 v2.1 | 系統狀態：已成功適應 Python 3.14 雲端環境")
+    st.caption("🤖 雲端全端自動化專案 v2.5 | 系統狀態：即時天氣中文化功能已全面實裝")
 
 st.title("🤖 AI 天氣問答機器人")
 st.write("輸入你想查詢的台灣縣市，我會立刻幫你查詢氣溫、天氣狀態、濕度及降雨機率！")
@@ -34,6 +34,21 @@ if search_button:
                     "金門": "Kinmen", "馬祖": "Matsu"
                 }
                 
+                # 天氣狀態中文字典
+                weather_dict = {
+                    "Sunny": "晴天 ☀️",
+                    "Clear": "晴朗 🌤️",
+                    "Partly Cloudy": "多雲時晴 ⛅",
+                    "Partly cloudy": "多雲時晴 ⛅",
+                    "Cloudy": "陰天 ☁️",
+                    "Overcast": "多雲轉陰 🌥️",
+                    "Mist": "有霧 🌫️",
+                    "Patchy rain nearby": "局部短暫雨 🌧️",
+                    "Patchy rain possible": "可能下局部雨 🌧️",
+                    "Light rain": "小雨 🌧️",
+                    "Heavy rain": "大雨 ⛈️"
+                }
+                
                 # 預設如果查不到就用台灣整體
                 english_city = city_mapping.get(city_input.strip().replace("台", "臺"), "Taiwan")
                 
@@ -45,8 +60,11 @@ if search_button:
                 # 擷取目前天氣核心數據
                 current_condition = weather_data['current_condition'][0]
                 temp = current_condition['temp_C']         
-                status = current_condition['weatherDesc'][0]['value'] 
+                status_eng = current_condition['weatherDesc'][0]['value'] 
                 humidity = current_condition['humidity'] # 濕度
+                
+                # 自動翻譯天氣狀態，如果字典裡沒有就顯示原本的英文
+                status_cht = weather_dict.get(status_eng, status_eng)
                 
                 # 擷取今日預報中的「降雨機率」
                 try:
@@ -64,7 +82,7 @@ if search_button:
                 with col1:
                     st.metric(label="🌡️ 目前氣溫", value=f"{temp} °C")
                 with col2:
-                    st.metric(label="🌤️ 天氣狀態", value=status)
+                    st.metric(label="🌤️ 天氣狀態", value=status_cht)
                 with col3:
                     st.metric(label="💧 空氣濕度", value=f"{humidity} %")
                 with col4:
