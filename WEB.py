@@ -1,4 +1,41 @@
-# --- 【超級氣象中文字典：英文全部改成小寫】 ---
+import streamlit as st
+import requests
+import datetime
+import pandas as pd
+
+# 1. 網頁頁面基本設定
+st.set_page_config(page_title="AI 天氣問答機器人 Pro", page_icon="🤖", layout="centered")
+
+# --- 【核心開發者：賴以航 原生穩定版區塊】 ---
+with st.container(border=True):
+    st.subheader("👨‍💻 核心開發者：賴以航 (Yi-Hang Lai)")
+    st.caption("🤖 雲端全端自動化專案 v3.2 | 系統狀態：已修正縮排，中文化全面啟動")
+
+st.title("🤖 AI 智慧天氣助理 Pro")
+st.write("輸入台灣縣市，為您提供即時天氣、AI 穿搭防雨建議，以及未來三日氣溫趨勢圖！")
+st.write("---")
+
+# 2. 建立輸入框與按鈕
+city_input = st.text_input("💬 請輸入台灣縣市名稱（例如：台北、台中、高雄、花蓮）：", value="雲林")
+search_button = st.button("🔍 啟動智慧分析")
+
+# 3. 當使用者按下按鈕時執行
+if search_button:
+    if city_input:
+        with st.spinner("AI 正在分析氣象大數據..."):
+            try:
+                # 將中文縣市轉換為 wttr.in 認識的名稱
+                city_mapping = {
+                    "台北": "Taipei", "新北": "New_Taipei", "桃園": "Taoyuan",
+                    "台中": "Taichung", "台南": "Tainan", "高雄": "Kaohsiung",
+                    "基隆": "Keelung", "新竹": "Hsinchu", "苗栗": "Miaoli",
+                    "彰化": "Changhua", "南投": "Nantou", "雲林": "Yunlin",
+                    "嘉義": "Chiayi", "屏東": "Pingtung", "宜蘭": "Yilan",
+                    "花蓮": "Hualien", "台東": "Taitung", "澎湖": "Penghu",
+                    "金門": "Kinmen", "馬祖": "Matsu"
+                }
+                
+                # --- 【超級氣象中文字典：全小寫完美對齊】 ---
                 weather_dict = {
                     "sunny": "晴天 ☀️", 
                     "clear": "晴朗 🌤️",
@@ -41,5 +78,68 @@
                 status_eng = current_condition['weatherDesc'][0]['value'] 
                 humidity = current_condition['humidity'] 
                 
-                # 【防錯核心】：把抓下來的英文強制變小寫 (.lower())，再去查字典！
+                # 強制變小寫比對字典
                 status_cht = weather_dict.get(status_eng.lower(), f"{status_eng} 🌍")
+                
+                try:
+                    rain_chance = int(weather_data['weather'][0]['hourly'][0]['chanceofrain'])
+                except:
+                    rain_chance = 0
+
+                now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                # B. 智慧穿搭與帶傘小建議
+                tips = []
+                if rain_chance >= 40:
+                    tips.append("🌧️ **帶傘提醒：** 降雨機率較高，出門記得帶把傘，免得淋成落湯雞喔！")
+                else:
+                    tips.append("🌤️ **防雨提醒：** 目前降雨機率低，可以放心出門！")
+                    
+                if temp >= 30:
+                    tips.append("🥵 **穿搭建議：** 天氣炎熱！建議穿著透氣短袖，並注意防曬、多補充水分。")
+                elif temp <= 18:
+                    tips.append("🥶 **穿搭建議：** 天氣偏涼！記得加件外套防風保暖，別感冒囉。")
+                else:
+                    tips.append("🧥 **穿搭建議：** 氣溫舒適，穿件薄長袖或舒適短袖搭配薄外套即可。")
+
+                # 4. 機器人回答的介面
+                st.chat_message("assistant").write(f"🤖 報告 **賴以航** 總工程師！AI 已完成 **{city_input}** 的大數據分析：")
+                
+                st.markdown(f"### 📊 當前天氣狀況")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric(label="🌡️ 目前氣溫", value=f"{temp} °C")
+                with col2:
+                    st.metric(label="💧 空氣濕度", value=f"{humidity} %")
+                with col3:
+                    st.metric(label="🌧️ 降雨機率", value=f"{rain_chance} %")
+                
+                # 顯示中文化天氣狀態
+                st.success(f"✨ **當前天氣型態：** {status_cht}")
+                
+                # 顯示 AI 貼心建議
+                st.info("\n".join(tips))
+                
+                # C. 處理未來三天預報趨勢圖表
+                st.subheader("📈 未來三日氣溫預報趨勢")
+                forecast_list = []
+                for day in weather_data['weather']:
+                    date_str = day['date']
+                    max_t = int(day['maxtempC'])
+                    min_t = int(day['mintempC'])
+                    forecast_list.append({"日期": date_str, "最高氣溫 (°C)": max_t, "最低氣溫 (°C)": min_t})
+                
+                df = pd.DataFrame(forecast_list)
+                df.set_index("日期", inplace=True)
+                st.line_chart(df)
+                
+                st.caption(f"📅 系統分析時間：{now_time}")
+
+            except Exception as e:
+                st.error(f"❌ 數據解析失敗！原因：{e}")
+    else:
+        st.warning("⚠️ 請記得先輸入縣市名稱喔！")
+
+st.write("\n---")
+st.caption("⚡ Powered by Streamlit & Python Chat Bot")
+st.caption("© 2026 賴以航 (Yi-Hang Lai). All rights reserved. 本網頁產權所有，非經授權請勿複製。")
