@@ -5,15 +5,10 @@ import datetime
 # 1. 網頁頁面基本設定
 st.set_page_config(page_title="AI 天氣問答機器人", page_icon="🤖", layout="centered")
 
-# --- 【核心開發者：賴以航 專屬區塊】 ---
-st.markdown("""
-    <div style="background-color:#F0F2F6; padding:12px; border-radius:10px; margin-bottom:20px; border-left: 5px solid #FF4B4B;">
-        <p style="margin:0; font-size:14px; color:#555555; font-weight:bold;">
-            👨‍💻 核心開發者：<span style="color:#FF4B4B; font-size:18px; font-weight:bold;">賴以航 (Yi-Hang Lai)</span>
-        </p>
-        <p style="margin:2px 0 0 0; font-size:12px; color:#888888;">雲端全端自動化專案 v2.0 | 系統狀態：即時天氣功能全面升級</p>
-    </div>
-""", unsafe_html=True)
+# --- 【核心開發者：賴以航 原生穩定版區塊】 ---
+with st.container(border=True):
+    st.subheader("👨‍💻 核心開發者：賴以航 (Yi-Hang Lai)")
+    st.caption("🤖 雲端全端自動化專案 v2.1 | 系統狀態：已成功適應 Python 3.14 雲端環境")
 
 st.title("🤖 AI 天氣問答機器人")
 st.write("輸入你想查詢的台灣縣市，我會立刻幫你查詢氣溫、天氣狀態、濕度及降雨機率！")
@@ -55,10 +50,9 @@ if search_button:
                 
                 # 擷取今日預報中的「降雨機率」
                 try:
-                    # 從今日(weather[0])的第一個時段(hourly[0])抓取降雨機率
                     rain_chance = weather_data['weather'][0]['hourly'][0]['chanceofrain']
                 except:
-                    rain_chance = "--" # 若抓取不到則顯示驚嘆號或預設值
+                    rain_chance = "--"
 
                 now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
